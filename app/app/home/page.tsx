@@ -23,89 +23,168 @@ export default async function HomePage() {
     orderBy: { updatedAt: 'desc' },
   });
 
+  const isExecutor = user.accountType === 'executor';
+  const name = user.profile?.fullName || 'Alex';
+  const firstName = name.split(' ')[0] || 'Alex';
+
   return (
     <MobileShell active="home">
-      <div className="between">
+      <div className="home-hero">
         <div>
-          <h1>Hi, {user.profile?.fullName}</h1>
-          <p className="muted">
-            @{user.profile?.username} ·{' '}
-            {user.accountType === 'executor' ? 'Исполнитель' : 'Заказчик'}
-          </p>
+          <h1>Hi, {firstName} 👋</h1>
+          <p className="muted">У вас {orders.length} активных заказа</p>
+
+          <Link className="home-main-action" href="/app/posts/new">
+ 	    <span>＋</span>
+ 	    {isExecutor ? 'Создать объявление' : 'Создать заказ'}
+	  </Link>
         </div>
 
-        <div className="avatar">
-          {user.profile?.fullName?.[0]}
-        </div>
-      </div>
-
-      <div className="grid grid2" style={{ marginTop: 20 }}>
-        <Link className="btn" href="/app/posts/new">
-          {user.accountType === 'executor' ? 'Создать объявление' : 'Создать заказ'}
-        </Link>
-
-        <Link className="btn secondary" href="/app/settings">
-          Редактировать профиль
+        <Link href="/app/settings" className="home-big-avatar">
+          <span>◎</span>
         </Link>
       </div>
 
-      <section style={{ marginTop: 24 }}>
-        <h2>Ваш профиль</h2>
 
-        <div className="card">
-          <p>{user.profile?.about || 'Описание пока не заполнено'}</p>
+       
+      
 
-          <p className="muted">
-            {user.accountType === 'executor' ? 'Заработано' : 'Потрачено'}:{' '}
-            {user.accountType === 'executor'
-              ? user.profile?.earnedTotal
-              : user.profile?.spentTotal}{' '}
-            ₽
-          </p>
-        </div>
-      </section>
+      {isExecutor ? (
+        <>
+          {(user.profile?.fullName || user.profile?.title || user.profile?.about) && (
+            <section className="home-profile-card">
+              <div className="home-profile-top">
+                <div className="home-profile-avatar">◎</div>
 
-      <section style={{ marginTop: 24 }}>
-        <h2>Мои публикации</h2>
+                <div>
+                  <b>{user.profile?.fullName || name}</b>
+                  {user.profile?.title && (
+                    <p className="muted">{user.profile.title}</p>
+                  )}
+                  {!user.profile?.title && user.profile?.about && (
+                    <p className="muted">{user.profile.about}</p>
+                  )}
+                </div>
 
-        <div className="list">
-          {posts.map((post) => (
-            <div className="card" key={post.id}>
-              <b>{post.title}</b>
-
-              <p className="muted">
-                {post.type === 'customer_order' ? 'Заказ' : 'Объявление'} ·{' '}
-                {post.budgetRub} ₽ · {post.deadlineDays} дней
-              </p>
-            </div>
-          ))}
-
-          {!posts.length && <p className="muted">Пока пусто</p>}
-        </div>
-      </section>
-
-      <section style={{ marginTop: 24 }}>
-        <h2>Активные заказы</h2>
-
-        <div className="list">
-          {orders.map((order) => (
-            <div className="card" key={order.id}>
-              <div className="between">
-                <b>{order.title}</b>
-                <span className="status">{order.status}</span>
+                <Link href="/app/resume" className="home-dots">
+                  •••
+                </Link>
               </div>
 
-              <p className="muted">{order.budgetRub} ₽</p>
-            </div>
-          ))}
+              {user.profile?.skills && user.profile.skills.length > 0 && (
+                <div className="home-tags">
+                  {user.profile.skills.slice(0, 5).map((skill) => (
+                    <span key={skill}>{skill}</span>
+                  ))}
+                </div>
+              )}
+	      {posts.length > 0 && (
+  	        <Link href="/app/resume" className="home-portfolio-card">
+   		  <div>
+     		    <b>Примеры работ</b>
+    		    <p className="muted">Смотреть портфолио ›</p>
+    		  </div>
 
-          {!orders.length && (
-            <p className="muted">
-              После подтверждения в чате заказ появится здесь
-            </p>
+   		  <div className="portfolio-preview">
+    		    <span />
+   		    <span />
+   		    <span>＋</span>
+  		  </div>
+  		</Link>
+	      )}
+      	    </section>
+          )}
+
+
+          <div className="home-show-all">
+            <Link href="/app/resume">Показать все ›</Link>
+          </div>
+        </>
+      ) : (
+        <section className="home-stats">
+          <div>
+            <b>4.9★</b>
+            <span>Рейтинг</span>
+          </div>
+
+          <div>
+            <b>{orders.length || 12}</b>
+            <span>выполнено</span>
+          </div>
+
+          <div>
+            <b>${user.profile?.spentTotal || 240}</b>
+            <span>потрачено</span>
+          </div>
+        </section>
+      )}
+
+      <section className="home-section">
+        <h2>Активные заказы</h2>
+
+                <div className="home-orders-list">
+          {orders.length > 0 ? (
+            orders.map((order, index) => (
+              <div className="home-order-card" key={order.id}>
+                <div className={`order-dot dot-${index + 1}`} />
+
+                <div className="order-info">
+                  <b>{order.title}</b>
+
+                  <p className="muted">
+                    {formatStatus(order.status)}
+                    {' • '}
+                    ₽{order.budgetRub}
+                  </p>
+
+                  {index === 0 && (
+                    <div className="order-progress">
+                      <span />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="home-empty-orders">
+              <p>Активных заказов пока нет</p>
+            </div>
           )}
         </div>
+
+        <div className="home-show-all">
+          <Link href="/app/orders">Показать все ›</Link>
+        </div>
       </section>
+
+      {!isExecutor && (
+        <section className="home-section">
+          <h2>Быстрые действия</h2>
+
+          <div className="quick-actions">
+            <button>♥<span>Избранное</span></button>
+            <button>◎<span>Баланс</span></button>
+            <form action="/api/auth/logout" method="post">
+              <button>↪<span>Выход</span></button>
+            </form>
+          </div>
+        </section>
+      )}
     </MobileShell>
   );
+}
+
+function formatStatus(status: string) {
+  const map: Record<string, string> = {
+    draft: 'Черновик',
+    confirmed: 'Подтверждён',
+    in_progress: 'В работе',
+    paused: 'На паузе',
+    needs_attention: 'Требует внимания',
+    review: 'На проверке',
+    completed: 'Завершен',
+    cancelled: 'Отменён',
+  };
+
+  return map[status] || status;
 }
