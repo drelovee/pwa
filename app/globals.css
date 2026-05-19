@@ -445,3 +445,524 @@ button:disabled {
     opacity: 1;
   }
 }
+.home-hero {
+  padding: 24px 6px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.home-hero h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.1;
+  font-weight: 800;
+}
+
+.home-main-action {
+  margin-top: 24px;
+  width: 188px;
+  height: 48px;
+  border: 1.4px solid #f2f2f2;
+  border-radius: 999px;
+  color: #f2f2f2;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.home-main-action span {
+  font-size: 30px;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.home-big-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #555;
+  display: grid;
+  place-items: center;
+  color: #151515;
+  text-decoration: none;
+  font-size: 28px;
+}
+
+.home-profile-card {
+  margin: 0 -18px;
+  padding: 12px 12px 20px;
+  border-top: 1px solid #303030;
+  border-bottom: 1px solid #303030;
+}
+
+.home-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.home-profile-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #555;
+  display: grid;
+  place-items: center;
+  color: #161616;
+  font-size: 24px;
+}
+
+.home-profile-top b {
+  font-size: 16px;
+}
+
+.home-profile-top p {
+  margin: 4px 0 0;
+  max-width: 230px;
+  line-height: 1.1;
+}
+
+.home-dots {
+  margin-left: auto;
+  color: #cfcfcf;
+  letter-spacing: 2px;
+}
+
+.home-tags {
+  margin-top: 12px;
+  display: flex;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.home-tags span {
+  padding: 5px 15px;
+  border: 1px solid #333;
+  border-radius: 999px;
+  background: #242424;
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.home-portfolio-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 24px;
+  background: #242424;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-portfolio-card b {
+  font-size: 16px;
+}
+
+.home-portfolio-card {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 24px;
+  background: #242424;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  color: inherit;
+}
+.portfolio-preview {
+  display: flex;
+  overflow: hidden;
+  border-radius: 7px;
+}
+
+.portfolio-preview span {
+  width: 55px;
+  height: 63px;
+  display: grid;
+  place-items: center;
+  font-size: 30px;
+}
+
+.portfolio-preview span:nth-child(1) {
+  background: #405b39;
+}
+
+.portfolio-preview span:nth-child(2) {
+  background: #36365e;
+}
+
+.portfolio-preview span:nth-child(3) {
+  background: #9b3b3d;
+  color: #421313;
+}
+
+.home-stats {
+  padding: 24px 6px 20px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid #303030;
+  text-align: center;
+}
+
+.home-stats b {
+  display: block;
+  font-size: 21px;
+}
+
+.home-stats span {
+  color: #8f8f8f;
+  font-size: 11px;
+}
+
+.home-section {
+  margin: 0 -18px;
+  padding: 14px 12px 20px;
+  border-bottom: 1px solid #303030;
+}
+
+.home-section h2 {
+  margin: 0 0 8px 12px;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.home-orders-list {
+  display: grid;
+  gap: 10px;
+}
+
+.home-order-card {
+  min-height: 72px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #222;
+  border: 1px solid #333;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.order-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.dot-1 {
+  background: #f3c56b;
+}
+
+.dot-2 {
+  background: #5177a7;
+}
+
+.dot-3 {
+  background: #bd858d;
+}
+
+.dot-4 {
+  background: #b486b8;
+}
+
+.order-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.order-info b {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.order-info p {
+  margin: 5px 0 0;
+}
+
+.order-progress {
+  margin-top: 9px;
+  height: 3px;
+  width: 100%;
+  max-width: 250px;
+  background: #171717;
+}
+
+.order-progress span {
+  display: block;
+  height: 3px;
+  width: 58%;
+  background: #9fcfbd;
+}
+
+.home-show-all {
+  margin-top: 9px;
+  text-align: right;
+}
+
+.home-show-all a {
+  color: #dcdcdc;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px 12px 0;
+}
+
+.quick-actions button {
+  width: 100%;
+  height: 64px;
+  border: 1px solid #333;
+  border-radius: 13px;
+  background: #242424;
+  color: #d8d8d8;
+  font-size: 24px;
+}
+
+.quick-actions button span {
+  margin-top: 5px;
+  display: block;
+  font-size: 13px;
+}
+
+.quick-actions form {
+  margin: 0;
+}
+.home-dots {
+  margin-left: auto;
+  color: #cfcfcf;
+  letter-spacing: 2px;
+  text-decoration: none;
+  font-weight: 800;
+}
+.resume-topbar {
+  height: 70px;
+  margin: -18px -18px 0;
+  padding: 0 16px;
+  border-bottom: 1px solid #303030;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resume-topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.resume-back {
+  color: #d8d8d8;
+  text-decoration: none;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.resume-save {
+  background: none;
+  border: 0;
+  color: #647098;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.resume-page {
+  padding: 12px 2px 130px;
+  display: grid;
+  gap: 22px;
+}
+
+.resume-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.resume-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #555;
+  display: grid;
+  place-items: center;
+  color: #151515;
+  font-size: 24px;
+}
+
+.resume-user b {
+  font-size: 16px;
+}
+
+.resume-user p {
+  margin: 4px 0 0;
+  color: #aaa;
+}
+
+.resume-page label {
+  display: grid;
+  gap: 8px;
+}
+
+.resume-page label span {
+  color: #c7c7c7;
+  font-size: 14px;
+}
+
+.resume-input,
+.resume-textarea {
+  width: 100%;
+  border: 1px solid #33333b;
+  background: #242329;
+  color: #f2f2f2;
+  border-radius: 7px;
+  box-sizing: border-box;
+  font-size: 15px;
+}
+
+.resume-input {
+  height: 31px;
+  padding: 0 10px;
+}
+
+.resume-textarea {
+  min-height: 94px;
+  padding: 10px;
+  resize: none;
+  line-height: 1.25;
+}
+
+.resume-section {
+  margin: 0 -18px;
+  padding: 18px;
+  border-top: 1px solid #303030;
+}
+
+.resume-section h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.resume-add-btn {
+  border: 1px dashed #343434;
+  background: transparent;
+  color: #7f7f7f;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 10px;
+}
+
+.resume-tags {
+  margin-top: 14px;
+  display: flex;
+  gap: 5px;
+  overflow: hidden;
+}
+
+.resume-tags span {
+  padding: 5px 15px;
+  border: 1px solid #333;
+  border-radius: 6px;
+  background: #242329;
+  color: #aaa;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.resume-portfolio {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.05fr;
+  gap: 7px;
+}
+
+.resume-portfolio span {
+  height: 88px;
+  border-radius: 7px;
+}
+
+.resume-portfolio span:nth-child(1) {
+  background: #405b39;
+}
+
+.resume-portfolio span:nth-child(2) {
+  background: #36365e;
+}
+
+.resume-portfolio span:nth-child(3) {
+  background: #9b3b3d;
+}
+
+.resume-experience {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.resume-experience b {
+  font-size: 15px;
+}
+
+.resume-experience p {
+  margin: 3px 0;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.resume-experience span {
+  font-size: 28px;
+  color: #aaa;
+}
+.home-empty-orders {
+  min-height: 140px;
+  border: 1px solid #333;
+  background: #222;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 0;
+}
+
+.home-empty-orders p {
+  margin: 0;
+  color: #8f8f8f;
+  font-size: 15px;
+  font-weight: 500;
+}
+.orders-topbar {
+  height: 64px;
+  margin: -18px -18px 18px;
+  padding: 0 16px;
+  border-bottom: 1px solid #303030;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.orders-topbar h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.orders-back {
+  color: #d8d8d8;
+  text-decoration: none;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.orders-page-list {
+  display: grid;
+  gap: 10px;
+}
