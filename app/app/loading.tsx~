@@ -1,0 +1,14 @@
+export default function AppLoading() {
+  return (
+    <div className="app-page-loader">
+      <div className="app-page-loader-card">
+        <div className="app-page-loader-dots">
+          <span />
+          <span />
+          <span />
+        </div>
+        <p>Загрузка</p>
+      </div>
+    </div>
+  );
+}

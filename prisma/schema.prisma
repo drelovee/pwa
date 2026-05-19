@@ -1,0 +1,366 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum AccountType {
+  executor
+  customer
+}
+
+enum PostType {
+  customer_order
+  executor_ad
+}
+
+enum PostStatus {
+  published
+  hidden
+  closed
+}
+
+enum OrderStatus {
+  draft
+  confirmed
+  in_progress
+  paused
+  needs_attention
+  review
+  completion_pending
+  completed
+  cancel_pending
+  cancelled
+}
+
+enum ChatType {
+  direct
+  offer
+  order
+  team
+  admin_team_offer
+}
+
+enum MessageType {
+  text
+  system
+  order_confirm
+  order_complete
+  order_cancel
+}
+
+enum TeamApplicationStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum FavoriteTarget {
+  profile
+  post
+  team
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String
+  accountType  AccountType
+  isAdmin      Boolean     @default(false)
+  isVerified   Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  profile        Profile?
+  posts          Post[]
+  messages       Message[]
+  chatMembers    ChatMember[]
+  teamsOwned     Team[]            @relation("TeamOwner")
+  teamMembers    TeamMember[]
+  applications   TeamApplication[]
+  invitesSent    TeamInvite[]      @relation("InvitesSent")
+  invitesGot     TeamInvite[]      @relation("InvitesGot")
+  favorites      Favorite[]
+  customerOrders Order[]           @relation("CustomerOrders")
+  executorOrders Order[]           @relation("ExecutorOrders")
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  fullName    String
+  username    String   @unique
+  avatarUrl   String?
+  coverUrl    String?
+  title       String?
+  about       String?
+  earnedTotal Int      @default(0)
+  spentTotal  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories ProfileCategory[]
+  portfolio  PortfolioItem[]
+  experience ExperienceItem[]
+}
+
+model Category {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+  imageUrl  String?
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  subcategories     Subcategory[]
+  postCategories    PostCategory[]
+  profileCategories ProfileCategory[]
+  teamCategories    TeamCategory[]
+}
+
+model Subcategory {
+  id         String  @id @default(cuid())
+  categoryId String
+  name       String
+  slug       String
+  usageCount Int     @default(0)
+  isActive   Boolean @default(true)
+
+  category          Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  postCategories    PostCategory[]
+  profileCategories ProfileCategory[]
+  teamCategories    TeamCategory[]
+
+  @@unique([categoryId, slug])
+}
+
+model ProfileCategory {
+  id            String  @id @default(cuid())
+  profileId     String
+  categoryId    String
+  subcategoryId String?
+
+  profile     Profile      @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+}
+
+model Post {
+  id           String     @id @default(cuid())
+  authorId     String
+  type         PostType
+  title        String
+  description  String
+  budgetRub    Int
+  deadlineDays Int
+  status       PostStatus @default(published)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  author     User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categories PostCategory[]
+  chats      Chat[]
+  orders     Order[]
+}
+
+model PostCategory {
+  id            String  @id @default(cuid())
+  postId        String
+  categoryId    String
+  subcategoryId String?
+
+  post        Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+}
+
+model Chat {
+  id             String   @id @default(cuid())
+  type           ChatType
+  title          String?
+  relatedPostId  String?
+  relatedOrderId String?
+  relatedTeamId  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  relatedPost  Post?        @relation(fields: [relatedPostId], references: [id], onDelete: SetNull)
+  relatedOrder Order?       @relation(fields: [relatedOrderId], references: [id], onDelete: SetNull)
+  relatedTeam  Team?        @relation(fields: [relatedTeamId], references: [id], onDelete: SetNull)
+  members      ChatMember[]
+  messages     Message[]
+}
+
+model ChatMember {
+  id         String    @id @default(cuid())
+  chatId     String
+  userId     String
+  role       String?
+  lastReadAt DateTime?
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  chatId    String
+  senderId  String?
+  type      MessageType @default(text)
+  text      String
+  createdAt DateTime    @default(now())
+
+  chat   Chat  @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender User? @relation(fields: [senderId], references: [id], onDelete: SetNull)
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  postId       String?
+  customerId   String
+  executorId   String?
+  teamId       String?
+  title        String
+  description  String
+  budgetRub    Int
+  deadlineDays Int
+  status       OrderStatus @default(draft)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  completedAt  DateTime?
+
+  post       Post?              @relation(fields: [postId], references: [id], onDelete: SetNull)
+  customer   User               @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+  executor   User?              @relation("ExecutorOrders", fields: [executorId], references: [id], onDelete: SetNull)
+  team       Team?              @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  chats      Chat[]
+  operations OperationHistory[]
+}
+
+model Team {
+  id                   String   @id @default(cuid())
+  ownerId              String
+  name                 String
+  avatarUrl            String?
+  description          String?
+  isOpenToApplications Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  owner        User              @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  applications TeamApplication[]
+  invites      TeamInvite[]
+  categories   TeamCategory[]
+  chats        Chat[]
+  orders       Order[]
+}
+
+model TeamCategory {
+  id            String  @id @default(cuid())
+  teamId        String
+  categoryId    String
+  subcategoryId String?
+
+  team        Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  category    Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  subcategory Subcategory? @relation(fields: [subcategoryId], references: [id], onDelete: SetNull)
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  roleTitle String
+  isAdmin   Boolean  @default(false)
+  joinedAt  DateTime @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model TeamApplication {
+  id        String                @id @default(cuid())
+  teamId    String
+  userId    String
+  status    TeamApplicationStatus @default(pending)
+  createdAt DateTime              @default(now())
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model TeamInvite {
+  id              String       @id @default(cuid())
+  teamId          String
+  invitedUserId   String
+  invitedByUserId String
+  status          InviteStatus @default(pending)
+  createdAt       DateTime     @default(now())
+
+  team        Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedUser User @relation("InvitesGot", fields: [invitedUserId], references: [id], onDelete: Cascade)
+  invitedBy   User @relation("InvitesSent", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+}
+
+model PortfolioItem {
+  id          String  @id @default(cuid())
+  profileId   String
+  imageUrl    String?
+  title       String
+  description String?
+  sortOrder   Int     @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model ExperienceItem {
+  id          String  @id @default(cuid())
+  profileId   String
+  position    String
+  company     String
+  dateFrom    String?
+  dateTo      String?
+  description String?
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id         String         @id @default(cuid())
+  userId     String
+  targetType FavoriteTarget
+  targetId   String
+  createdAt  DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OperationHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  orderId     String?
+  type        String
+  amountRub   Int
+  description String?
+  createdAt   DateTime @default(now())
+
+  order Order? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+}
