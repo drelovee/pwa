@@ -43,7 +43,161 @@ async function sendMessage(formData: FormData) {
 
   revalidatePath(`/app/chats/${chatId}`);
 }
+async function confirmOrder(formData: FormData) {
+  'use server';
 
+  const user = await getCurrentUser();
+  if (!user) redirect('/auth/login');
+
+  const chatId = String(formData.get('chatId'));
+
+  const chat = await prisma.chat.findUnique({
+    where: { id: chatId },
+    include: {
+      members: true,
+      relatedPost: true,
+      relatedOrder: true,
+      relatedTeam: true,
+    },
+  });
+
+  if (!chat) return;
+
+  const isMember = chat.members.some((member) => member.userId === user.id);
+
+  if (!isMember && !user.isAdmin) {
+    throw new Error('Нет доступа к чату');
+  }
+
+  if (chat.relatedOrderId) {
+    await prisma.order.update({
+      where: { id: chat.relatedOrderId },
+      data: { status: 'confirmed' },
+    });
+
+    await prisma.message.create({
+      data: {
+        chatId,
+        senderId: null,
+        type: 'system',
+        text: 'Заказ подтверждён.',
+      },
+    });
+
+    revalidatePath(`/app/chats/${chatId}`);
+    revalidatePath('/app/home');
+    return;
+  }
+
+  if (!chat.relatedPost) return;
+
+  const customerId =
+    chat.relatedPost.type === 'customer_order'
+      ? chat.relatedPost.authorId
+      : user.id;
+
+  const executorMember = chat.members.find(
+    (member) => member.userId !== customerId
+  );
+
+  const executorId =
+    chat.relatedPost.type === 'executor_ad'
+      ? chat.relatedPost.authorId
+      : executorMember?.userId || null;
+
+  const orderData: any = {
+    title: chat.relatedPost.title,
+    description: chat.relatedPost.description,
+    budgetRub: chat.relatedPost.budgetRub,
+    deadlineDays: chat.relatedPost.deadlineDays,
+    customerId,
+    status: 'confirmed',
+    postId: chat.relatedPost.id,
+  };
+
+  if (executorId) {
+    orderData.executorId = executorId;
+  }
+
+  if (chat.relatedTeamId) {
+    orderData.teamId = chat.relatedTeamId;
+  }
+
+  const order = await prisma.order.create({
+    data: orderData,
+  });
+
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: {
+      relatedOrderId: order.id,
+      updatedAt: new Date(),
+    },
+  });
+
+  await prisma.message.create({
+    data: {
+      chatId,
+      senderId: null,
+      type: 'system',
+      text: 'Заказ подтверждён и добавлен в активные заказы.',
+    },
+  });
+
+  revalidatePath(`/app/chats/${chatId}`);
+  revalidatePath('/app/home');
+}
+
+async function cancelOrder(formData: FormData) {
+  'use server';
+
+  const user = await getCurrentUser();
+  if (!user) redirect('/auth/login');
+
+  const chatId = String(formData.get('chatId'));
+
+  const chat = await prisma.chat.findUnique({
+    where: { id: chatId },
+    include: {
+      members: true,
+      relatedOrder: true,
+    },
+  });
+
+  if (!chat) return;
+
+  const isMember = chat.members.some((member) => member.userId === user.id);
+
+  if (!isMember && !user.isAdmin) {
+    throw new Error('Нет доступа к чату');
+  }
+
+  if (chat.relatedOrderId) {
+    await prisma.order.update({
+      where: { id: chat.relatedOrderId },
+      data: { status: 'cancelled' },
+    });
+  }
+
+  await prisma.message.create({
+    data: {
+      chatId,
+      senderId: null,
+      type: 'system',
+      text: 'Заказ отменён.',
+    },
+  });
+
+  await prisma.chat.update({
+    where: { id: chatId },
+    data: {
+      updatedAt: new Date(),
+    },
+  });
+
+  revalidatePath(`/app/chats/${chatId}`);
+  revalidatePath('/app/home');
+}
 function formatTime(date: Date) {
   return new Date(date).toLocaleTimeString('ru-RU', {
     hour: '2-digit',
@@ -145,8 +299,7 @@ export default async function ChatPage({
           <p>{subtitle}</p>
         </div>
 
-        <a className="chat-search" href={`/app/chats/${chat.id}?search=1`}>
-          🔍
+        <a className="chat-search">
         </a>
       </header>
 
@@ -227,19 +380,27 @@ export default async function ChatPage({
         })}
       </main>
 
-      {(chat.type === 'offer' || chat.type === 'admin_team_offer') && (
-        <section className="chat-confirm-panel">
-          <div>
-            <b>Подтвердить заказ?</b>
-            <p>После подтверждения заказ появится в активных заказах.</p>
-          </div>
-          <div className="chat-confirm-actions">
-            <button type="button">Подтвердить</button>
-            <button type="button">Отменить</button>
-          </div>
-        </section>
-      )}
+      {(chat.type === 'offer' || chat.type === 'admin_team_offer') &&
+        !chat.relatedOrderId && (
+          <section className="chat-confirm-panel">
+            <div>
+              <b>Подтвердить заказ?</b>
+              <p>После подтверждения заказ появится в активных заказах.</p>
+            </div>
 
+            <div className="chat-confirm-actions">
+              <form action={confirmOrder}>
+                <input type="hidden" name="chatId" value={chat.id} />
+                <button type="submit">Подтвердить</button>
+              </form>
+
+              <form action={cancelOrder}>
+                <input type="hidden" name="chatId" value={chat.id} />
+                <button type="submit">Отменить</button>
+              </form>
+            </div>
+          </section>
+      )}
       <form action={sendMessage} className="chat-input-panel">
         <input type="hidden" name="chatId" value={chat.id} />
         <input name="text" placeholder="Введите сообщение..." autoComplete="off" />
